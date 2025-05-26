@@ -1,43 +1,52 @@
 import { useState } from "react";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  Outlet,
+  useParams,
+  Link,
+} from "react-router-dom";
+
 import Calendar from "./Calendar";
 import Login from "./Login";
 import Registro from "./Registro";
-import { ReservaProvider } from "./ReservaContext";
 import ReservasConfirmadas from "./ReservasConfirmadas";
 import "./App.css";
 import "./index.css";
 
+// Componente para rutas privadas
+function PrivateRoute({ usuario }) {
+  return usuario ? <Outlet /> : <Navigate to="/login" />;
+}
+
+// Ruta dinámica: detalle de clase
+function ClaseDetalle() {
+  const { id } = useParams();
+  return (
+    <div>
+      <h2>Detalle de la clase ID: {id}</h2>
+      {/* Acá podés cargar datos reales usando el ID */}
+    </div>
+  );
+}
+
 function App() {
   const [usuario, setUsuario] = useState(null);
-  const [mostrarModal, setMostrarModal] = useState(false);
-  const [tipoModal, setTipoModal] = useState("");
-  const [mostrarReservas, setMostrarReservas] = useState(false);
 
   const cerrarSesion = () => {
     if (confirm("¿Cerrar sesión?")) {
       setUsuario(null);
-      setMostrarReservas(false);
     }
   };
 
-  const abrirModal = (tipo) => {
-    setTipoModal(tipo);
-    setMostrarModal(true);
-  };
-
-  const cerrarModal = () => {
-    setMostrarModal(false);
-    setTipoModal("");
-  };
-
-  // ✅ Maneja cuando el usuario inicia sesión o se registra
   const handleLoginRegistro = (usuarioInfo) => {
     setUsuario(usuarioInfo);
-    cerrarModal(); // Cierra el modal automáticamente
   };
 
   return (
-    <ReservaProvider>
+    <BrowserRouter>
       <div className="app-container">
         <nav className="navbar">
           <div className="navbar-left">
@@ -50,22 +59,20 @@ function App() {
             </div>
           </div>
 
-          {!usuario && (
+          {!usuario ? (
             <div className="auth-buttons">
-              <button onClick={() => abrirModal("login")} className="auth-btn">
-                Iniciar sesión
-              </button>
-              <button onClick={() => abrirModal("registro")} className="auth-btn">
-                Crear cuenta
-              </button>
+              <Link to="/login">
+                <button className="auth-btn">Iniciar sesión</button>
+              </Link>
+              <Link to="/registro">
+                <button className="auth-btn">Crear cuenta</button>
+              </Link>
             </div>
-          )}
-
-          {usuario && (
+          ) : (
             <div className="usuario-opciones">
-              <button className="auth-btn" onClick={() => setMostrarReservas(!mostrarReservas)}>
-                {mostrarReservas ? "Ocultar mis clases" : "Ver mis clases"}
-              </button>
+              <Link to="/mis-clases">
+                <button className="auth-btn">Ver mis clases</button>
+              </Link>
               <button className="cerrar-btn" onClick={cerrarSesion}>
                 Cerrar sesión
               </button>
@@ -74,30 +81,63 @@ function App() {
         </nav>
 
         <main className="contenido">
-          {usuario && (
-            <>
-              <h2 className="saludo">¡Hola {usuario.nombre || usuario.email}! 🌿</h2>
-              <Calendar />
-              {mostrarReservas && <ReservasConfirmadas />}
-            </>
-          )}
+          <Routes>
+            {/* Rutas públicas */}
+            <Route
+              path="/login"
+              element={
+                usuario ? (
+                  <Navigate to="/" />
+                ) : (
+                  <Login onLogin={handleLoginRegistro} />
+                )
+              }
+            />
+            <Route
+              path="/registro"
+              element={
+                usuario ? (
+                  <Navigate to="/" />
+                ) : (
+                  <Registro setUsuario={handleLoginRegistro} />
+                )
+              }
+            />
+
+            {/* Rutas privadas */}
+            <Route element={<PrivateRoute usuario={usuario} />}>
+              <Route
+                path="/"
+                element={
+                  <>
+                    <h2 className="saludo">
+                      ¡Hola {usuario?.nombre || usuario?.email}! 🌿
+                    </h2>
+                    <Calendar />
+                  </>
+                }
+              />
+              <Route
+                path="/mis-clases"
+                element={
+                  <>
+                    <h2 className="saludo">
+                      Tus clases reservadas, {usuario?.nombre || usuario?.email}
+                    </h2>
+                    <ReservasConfirmadas />
+                  </>
+                }
+              />
+              <Route path="/clase/:id" element={<ClaseDetalle />} />
+            </Route>
+
+            {/* Ruta catch-all */}
+            <Route
+              path="*"
+              element={<Navigate to={usuario ? "/" : "/login"} />}
+            />
+          </Routes>
         </main>
-
-        {mostrarModal && (
-          <div className="modal-overlay" onClick={cerrarModal}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <button className="close-btn" onClick={cerrarModal}>
-                X
-              </button>
-
-              {tipoModal === "login" ? (
-                <Login onLogin={handleLoginRegistro} />
-              ) : (
-                <Registro setUsuario={handleLoginRegistro} />
-              )}
-            </div>
-          </div>
-        )}
 
         <footer className="footer">
           <div>Aquaterra Studio · Pilates & Yoga</div>
@@ -120,7 +160,7 @@ function App() {
           <div className="copyright">© 2025 Aquaterra Studio</div>
         </footer>
       </div>
-    </ReservaProvider>
+    </BrowserRouter>
   );
 }
 
