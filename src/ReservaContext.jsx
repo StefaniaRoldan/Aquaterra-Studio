@@ -14,8 +14,16 @@ export function ReservaProvider({ children }) {
     }
   };
 
+  const cancelarReserva = (idClase) => {
+    const confirmacion = confirm("¿Querés cancelar esta reserva?");
+    if (confirmacion) {
+      setReservas(reservas.filter((id) => id !== idClase));
+      alert("Reserva cancelada.");
+    }
+  };
+
   return (
-    <ReservaContext.Provider value={{ reservas, reservar }}>
+    <ReservaContext.Provider value={{ reservas, reservar, cancelarReserva }}>
       {children}
     </ReservaContext.Provider>
   );

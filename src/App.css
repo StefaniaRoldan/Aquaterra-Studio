@@ -319,3 +319,36 @@ body {
 .login-crear-cuenta:hover {
   color: #88b4a1;
 }
+.reservas-container {
+  background-color: white;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 128, 128, 0.2);
+  margin-top: 20px;
+}
+
+.reservas-titulo {
+  font-size: 20px;
+  font-weight: bold;
+  color: teal;
+  margin-bottom: 10px;
+}
+
+.reservas-vacio {
+  color: #666;
+}
+
+.reservas-lista {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.reserva-item {
+  background-color: #e6f2f2;
+  border: 1px solid #b2d8d8;
+  padding: 10px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  color: #006666;
+}

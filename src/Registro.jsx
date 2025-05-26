@@ -1,12 +1,14 @@
 import { useState } from "react";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "./firebase"; // ajustá la ruta si es necesario
 
-function Registro({ onRegister, volver }) {
+function Registro({ setUsuario, volver }) {
   const [nombre, setNombre] = useState("");
   const [email, setEmail] = useState("");
   const [telefono, setTelefono] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!nombre || !email || !telefono || !password) {
@@ -14,20 +16,34 @@ function Registro({ onRegister, volver }) {
       return;
     }
 
-    const usuario = {
-      nombre,
-      email,
-      telefono,
-    };
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
 
-    onRegister(usuario);
+      setUsuario({ uid: user.uid, email: user.email, nombre, telefono });
+      alert("Usuario registrado con éxito!");
+    } catch (error) {
+      console.error(error);
+
+      switch (error.code) {
+        case "auth/email-already-in-use":
+          alert("Este email ya está registrado. Por favor, iniciá sesión o usá otro email.");
+          break;
+        case "auth/invalid-email":
+          alert("El email ingresado no es válido. Por favor, corregilo.");
+          break;
+        case "auth/weak-password":
+          alert("La contraseña es muy débil. Debe tener al menos 6 caracteres.");
+          break;
+        default:
+          alert(`Error al registrar: ${error.message}`);
+      }
+    }
   };
 
   return (
     <div className="registro-container">
-      <h1 className="registro-titulo">
-        Crear cuenta
-      </h1>
+      <h1 className="registro-titulo">Crear cuenta</h1>
 
       <form onSubmit={handleSubmit} className="registro-formulario">
         <label className="registro-label">
