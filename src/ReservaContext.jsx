@@ -5,6 +5,9 @@ import {
   getDocs,
   query,
   where,
+  doc,
+  updateDoc,
+  deleteDoc,
 } from "firebase/firestore";
 import { firestore } from "./firebase";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -16,13 +19,17 @@ export function ReservaProvider({ children }) {
   const [clases, setClases] = useState([]);
   const [notificaciones, setNotificaciones] = useState([]);
 
-  // Cargar clases desde el mock
+  // Cargar clases desde Firestore
   useEffect(() => {
     const cargarClases = async () => {
       try {
-        const res = await fetch("/api/clases");
-        const data = await res.json();
-        setClases(data);
+        const clasesRef = collection(firestore, "clases");
+        const snapshot = await getDocs(clasesRef);
+        const clasesData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setClases(clasesData);
       } catch (error) {
         console.error("Error al cargar clases:", error);
       }
@@ -54,6 +61,7 @@ export function ReservaProvider({ children }) {
     return () => desuscribir();
   }, []);
 
+  // Reservar clase
   const reservar = async (idClase) => {
     const clase = clases.find((c) => c.id === idClase);
     if (!clase || clase.cupos <= 0) return;
@@ -64,63 +72,96 @@ export function ReservaProvider({ children }) {
     }
 
     try {
-      const res = await fetch("/api/reservar", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idClase }),
+      const auth = getAuth();
+      const user = auth.currentUser;
+
+      // Guardar reserva en Firestore
+      await addDoc(collection(firestore, "reservas"), {
+        idClase: clase.id,
+        dia: clase.dia,
+        hora: clase.hora,
+        tipoClase: clase.tipo,
+        usuarioId: user?.uid || "desconocido",
+        usuarioEmail: user?.email || "sin_email",
+        timestamp: new Date(),
       });
-      const data = await res.json();
 
-      if (res.ok) {
-        setReservas((prev) => [...prev, idClase]);
+      // Actualizar estado local
+      setReservas((prev) => [...prev, idClase]);
 
-        const nuevasClases = clases.map((c) =>
-          c.id === idClase ? { ...c, cupos: c.cupos - 1 } : c
-        );
-        setClases(nuevasClases);
+      const nuevasClases = clases.map((c) =>
+        c.id === idClase ? { ...c, cupos: c.cupos - 1 } : c
+      );
+      setClases(nuevasClases);
 
-        const nuevaNotificacion = {
-          id: Date.now(),
-          mensaje: `Nuevo turno reservado: Clase ${idClase}`,
-          fecha: new Date().toLocaleString(),
-        };
-        setNotificaciones((prev) => [nuevaNotificacion, ...prev]);
+      // Actualizar Firestore (cupos -1)
+      await updateDoc(doc(firestore, "clases", idClase), {
+        cupos: clase.cupos - 1,
+      });
 
-        // Guardar reserva en Firestore
-        const auth = getAuth();
-        const user = auth.currentUser;
+      // Agregar notificación
+      const nuevaNotificacion = {
+        id: Date.now(),
+        mensaje: `Nuevo turno reservado: Clase ${idClase}`,
+        fecha: new Date().toLocaleString(),
+      };
+      setNotificaciones((prev) => [nuevaNotificacion, ...prev]);
 
-        await addDoc(collection(firestore, "reservas"), {
-          idClase: clase.id,
-          dia: clase.dia,
-          hora: clase.hora,
-          tipoClase: clase.tipo,
-          usuarioId: user?.uid || "desconocido",
-          usuarioEmail: user?.email || "sin_email",
-          timestamp: new Date(),
-        });
-
-        alert(data.message);
-      } else {
-        alert(data.message || "Error al reservar la clase");
-      }
+      alert("Reserva confirmada");
     } catch (error) {
       console.error("Error en la reserva:", error);
       alert("Error al reservar la clase");
     }
   };
 
-  const cancelarReserva = (idClase) => {
+  // Cancelar reserva y actualizar cupos en Firestore
+  const cancelarReserva = async (idClase) => {
     const confirmacion = confirm("¿Querés cancelar esta reserva?");
-    if (confirmacion) {
-      setReservas(reservas.filter((id) => id !== idClase));
+    if (!confirmacion) return;
 
+    try {
+      const auth = getAuth();
+      const user = auth.currentUser;
+
+      // Buscar y eliminar la reserva en Firestore
+      const reservasRef = collection(firestore, "reservas");
+      const q = query(
+        reservasRef,
+        where("usuarioId", "==", user?.uid),
+        where("idClase", "==", idClase)
+      );
+      const snapshot = await getDocs(q);
+      snapshot.forEach(async (docu) => {
+        await deleteDoc(docu.ref);
+      });
+
+      // Actualizar cupo en Firestore
+      const clase = clases.find((c) => c.id === idClase);
+      if (clase) {
+        await updateDoc(doc(firestore, "clases", idClase), {
+          cupos: clase.cupos + 1,
+        });
+      }
+
+      // Actualizar estado local
+      setReservas((prev) => prev.filter((id) => id !== idClase));
       const nuevasClases = clases.map((c) =>
         c.id === idClase ? { ...c, cupos: c.cupos + 1 } : c
       );
       setClases(nuevasClases);
 
+      // Notificación
+      const nuevaNotificacion = {
+        id: Date.now(),
+        mensaje: `Reserva cancelada: Clase ${idClase}`,
+        fecha: new Date().toLocaleString(),
+      };
+      setNotificaciones((prev) => [nuevaNotificacion, ...prev]);
+
       alert("Reserva cancelada.");
+    } catch (error) {
+      console.error("Error al cancelar la reserva:", error);
+      alert("Hubo un problema al cancelar la reserva.");
     }
   };
 
