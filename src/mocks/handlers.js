@@ -1,8 +1,7 @@
-import { rest } from "msw";
-
+import * as msw from "msw";
 export const handlers = [
-  // Endpoint para listar clases
-  rest.get("/api/clases", (req, res, ctx) => {
+
+  msw.rest.get("/api/clases", (req, res, ctx) => {
     return res(
       ctx.status(200),
       ctx.json([
@@ -20,9 +19,8 @@ export const handlers = [
   }),
 
   // Endpoint para reservar una clase
-  rest.post("/api/reservar", (req, res, ctx) => {
+  msw.rest.post("/api/reservar", (req, res, ctx) => {
     const { idClase } = req.body;
-    // Podés simular éxito o error acá
     return res(
       ctx.status(200),
       ctx.json({ message: `Reserva confirmada para clase ${idClase}` })

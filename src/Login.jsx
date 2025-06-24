@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
-import { auth } from "./firebase"; // ajustá el path si es necesario
+import { auth, firestore } from "./firebase"; // importa firestore además de auth
+import { doc, getDoc } from "firebase/firestore";
 
 function Login({ setUsuario, onIrARegistro }) {
   const [email, setEmail] = useState("");
@@ -12,11 +13,21 @@ function Login({ setUsuario, onIrARegistro }) {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
+      // Traer rol desde Firestore
+      const usuarioDoc = doc(firestore, "usuarios", user.uid);
+      const usuarioSnap = await getDoc(usuarioDoc);
+
+      let rol = "usuario"; // valor por defecto
+      if (usuarioSnap.exists()) {
+        rol = usuarioSnap.data().rol || "usuario";
+      }
+
       setUsuario({
         uid: user.uid,
         email: user.email,
-        nombre: "Usuario", // opcional
-        telefono: "",      // opcional
+        nombre: usuarioSnap.exists() ? usuarioSnap.data().nombre || "Usuario" : "Usuario",
+        telefono: usuarioSnap.exists() ? usuarioSnap.data().telefono || "" : "",
+        rol,
       });
 
       alert("¡Sesión iniciada con éxito!");
