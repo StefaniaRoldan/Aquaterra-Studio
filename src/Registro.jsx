@@ -1,6 +1,9 @@
 import { useState } from "react";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "./firebase"; // ajustá la ruta si es necesario
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { auth, firestore } from "./firebase"; // ajustá la ruta si es necesario
+import { doc, setDoc } from "firebase/firestore";
+import "./App.css";
+import "./index.css";
 
 function Registro({ setUsuario, volver }) {
   const [nombre, setNombre] = useState("");
@@ -17,11 +20,36 @@ function Registro({ setUsuario, volver }) {
     }
 
     try {
+      // 1. Crear usuario en Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      setUsuario({ uid: user.uid, email: user.email, nombre, telefono });
+      // 2. Actualizar perfil con el nombre en Firebase Auth (displayName)
+      await updateProfile(user, { displayName: nombre });
+
+      // 3. Guardar documento en Firestore en la colección 'usuarios'
+      await setDoc(doc(firestore, "usuarios", user.uid), {
+        nombre,
+        telefono,
+        rol: "usuario", // rol por defecto
+        email,
+        createdAt: new Date(),
+      });
+
+      // 4. Actualizar estado global con datos del usuario (incluye displayName y nombre Firestore)
+      setUsuario({
+        uid: user.uid,
+        email,
+        nombre,
+        telefono,
+        rol: "usuario",
+      });
+
       alert("Usuario registrado con éxito!");
+
+      // 5. Opcional: volver (cerrar formulario o redirigir)
+      if (volver) volver();
+
     } catch (error) {
       console.error(error);
 
@@ -53,6 +81,7 @@ function Registro({ setUsuario, volver }) {
             className="registro-input"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
+            required
           />
         </label>
 
@@ -63,6 +92,7 @@ function Registro({ setUsuario, volver }) {
             className="registro-input"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
           />
         </label>
 
@@ -73,6 +103,7 @@ function Registro({ setUsuario, volver }) {
             className="registro-input"
             value={telefono}
             onChange={(e) => setTelefono(e.target.value)}
+            required
           />
         </label>
 
@@ -83,6 +114,7 @@ function Registro({ setUsuario, volver }) {
             className="registro-input"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
           />
         </label>
 

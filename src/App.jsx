@@ -16,6 +16,7 @@ import ReservasConfirmadas from "./ReservasConfirmadas";
 import { ReservaProvider } from "./ReservaContext";
 import "./App.css";
 import "./index.css";
+import { FaInstagram, FaWhatsapp } from "react-icons/fa";
 
 // Importamos PanelAdmin (agregá este archivo si no lo tenés)
 import PanelAdmin from "./PanelAdmin";
@@ -78,9 +79,9 @@ function App() {
               </div>
             ) : (
               <div className="usuario-opciones">
-                 <Link to="/">
-    <button className="auth-btn">Inicio</button>
-  </Link>
+                <Link to="/">
+                  <button className="auth-btn">Inicio</button>
+                </Link>
                 <Link to="/mis-clases">
                   <button className="auth-btn">Ver mis clases</button>
                 </Link>
@@ -104,6 +105,7 @@ function App() {
 
           <main className="contenido">
             {usuario && modoAdmin ? (
+              // Mostrar panel admin si modo admin está activo
               <PanelAdmin />
             ) : (
               <Routes>
@@ -127,9 +129,17 @@ function App() {
                     path="/"
                     element={
                       <>
-                        <h2 className="saludo">
+                        {/* Saludo con nombre o email */}
+                        <h1 className="saludo">
                           ¡Hola {usuario?.nombre || usuario?.email}! 🌿
-                        </h2>
+                        </h1>
+                         {/* Texto informativo solo para usuarios logueados */}
+      <div className="info-mensual" style={{ marginBottom: "1rem", fontStyle: "italic", color: "#5f7161" }}>
+      <h2> Tenes 8 clases disponibles por mes </h2>
+        Métodos de pago: Transferencia, MercadoPago, Efectivo.
+       <p> Si abonas por Mercado Pago o Transferencia envianos
+        el comprobante por WhatsApp </p>
+      </div>
                         <Calendar />
                       </>
                     }
@@ -138,6 +148,7 @@ function App() {
                     path="/mis-clases"
                     element={
                       <>
+                        {/* Saludo personalizado */}
                         <h2 className="saludo">
                           Tus clases reservadas, {usuario?.nombre || usuario?.email}
                         </h2>
@@ -165,13 +176,16 @@ function App() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
+                 <FaInstagram size={20} style={{ marginRight: 6 }} />
                 Instagram
               </a>
               <a
                 href="https://api.whatsapp.com/send/?phone=5491126418570&text&type=phone_number&app_absent=0"
                 target="_blank"
                 rel="noopener noreferrer"
+                
               >
+                 <FaWhatsapp size={20} style={{ marginRight: 6 }} />
                 WhatsApp
               </a>
             </div>
@@ -182,4 +196,5 @@ function App() {
     </BrowserRouter>
   );
 }
+
 export default App;

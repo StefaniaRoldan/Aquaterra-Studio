@@ -77,14 +77,15 @@ export function ReservaProvider({ children }) {
 
       // Guardar reserva en Firestore
       await addDoc(collection(firestore, "reservas"), {
-        idClase: clase.id,
-        dia: clase.dia,
-        hora: clase.hora,
-        tipoClase: clase.tipo,
-        usuarioId: user?.uid || "desconocido",
-        usuarioEmail: user?.email || "sin_email",
-        timestamp: new Date(),
-      });
+  idClase: clase.id,
+  dia: clase.dia,
+  hora: clase.hora,
+  tipoClase: clase.tipo,
+  usuarioId: user?.uid || "desconocido",
+  usuarioEmail: user?.email || "sin_email",
+  usuarioNombre: user?.displayName || "Nombre no disponible",
+  timestamp: new Date(),
+});
 
       // Actualizar estado local
       setReservas((prev) => [...prev, idClase]);

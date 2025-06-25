@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
-import { firestore } from "./firebase"; // asegurate que esté bien la ruta
+import { firestore } from "./firebase";
 import NotificacionesAdmin from "./NotificacionesAdmin";
 
 export default function PanelAdmin() {
@@ -28,8 +28,8 @@ export default function PanelAdmin() {
 
   const limpiarNotificaciones = () => {
     if (window.confirm("¿Querés eliminar todas las notificaciones?")) {
-      // Podés agregar lógica para limpiar de Firestore también si querés
       console.log("Notificaciones eliminadas");
+      // Acá podés agregar la lógica para limpiar en Firestore si querés
     }
   };
 
@@ -47,7 +47,7 @@ export default function PanelAdmin() {
           <ul>
             {todasLasReservas.map((reserva) => (
               <li key={reserva.id}>
-                {reserva.usuarioEmail || reserva.usuarioId} - {reserva.tipoClase} - {reserva.dia} a las {reserva.hora}
+                {reserva.usuarioNombre} - {reserva.usuarioEmail} - {reserva.tipoClase} - {reserva.dia} - {reserva.hora}
               </li>
             ))}
           </ul>
