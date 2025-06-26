@@ -54,13 +54,7 @@ export default function PanelAdmin() {
         )}
       </section>
 
-      <section>
-        <h3>Notificaciones</h3>
-        <button onClick={limpiarNotificaciones} style={{ marginBottom: "1rem" }}>
-          Limpiar todas las notificaciones
-        </button>
-        <NotificacionesAdmin />
-      </section>
+     
     </div>
   );
 }
