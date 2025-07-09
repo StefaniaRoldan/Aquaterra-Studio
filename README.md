@@ -33,3 +33,11 @@ Aquaterra Studio es un espacio dedicado al bienestar físico y mental. La app pe
 - Cada usuario puede reservar un máximo de **8 clases por mes**.
 - Los cupos se actualizan automáticamente.
 - El usuario puede cancelar reservas desde su panel.
+
+   ✅ Pruebas de Compatibilidad
+
+Se verificó el funcionamiento de la app **Aquaterra Studio** en:
+- 📱 **Móviles**: interfaz clara, reservas y botones accesibles.
+- 💻 **Tablets**: layout responsive sin cortes ni desbordes.
+- 🖥️ **Escritorio**: panel admin y calendario correctamente alineados.
+- ⚡ **Tiempos de carga**: óptimos, sin demoras significativas.
