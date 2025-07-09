@@ -1,12 +1,35 @@
-# React + Vite
+# Aquaterra Studio · Pilates & Yoga
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Este proyecto es una aplicación web para la reserva de clases de Pilates y Yoga, desarrollada para **Aquaterra Studio**.
+Permite a los usuarios registrarse, iniciar sesión, reservar clases, cancelar reservas y gestionar cupos en tiempo real.
 
-Currently, two official plugins are available:
+## 🧘‍♀️ Descripción
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Aquaterra Studio es un espacio dedicado al bienestar físico y mental. La app permite:
+- Mostrar un calendario de clases del mes en curso.
+- Permitir a los usuarios reservar hasta 8 clases mensuales.
+- Control de cupos en tiempo real.
+- Panel de administrador para gestionar reservas y notificaciones.
+- Integración con Firebase para autenticación y base de datos.
 
-## Expanding the ESLint configuration
+## 🚀 Tecnologías utilizadas
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- **React**: Librería principal para el frontend.
+- **Firebase**: Autenticación, Firestore Database y Hosting.
+- **React Router**: Navegación entre rutas.
+- **React Context API**: Gestión global de estados de reserva.
+- **React Toastify**: Notificaciones de usuario.
+- **SweetAlert2**: Modales de confirmación elegantes.
+- **CSS Modules**: Estilos personalizados.
+
+  ## 🔒 Autenticación
+
+- Los usuarios deben registrarse o iniciar sesión para acceder a sus clases.
+- El estado de autenticación se gestiona con Firebase Auth.
+- Los datos de reserva se guardan por usuario en Firestore.
+
+## 📅 Reservas
+
+- Cada usuario puede reservar un máximo de **8 clases por mes**.
+- Los cupos se actualizan automáticamente.
+- El usuario puede cancelar reservas desde su panel.
